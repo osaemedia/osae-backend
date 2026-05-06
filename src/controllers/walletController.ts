@@ -5,6 +5,13 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '../server';
 import { sanitizeText } from '../utils/sanitize';
 
+type TransactionWithUsers = Prisma.TransactionGetPayload<{
+  include: {
+    sender: { select: { username: true, avatar: true } };
+    receiver: { select: { username: true, avatar: true } };
+  };
+}>;
+
 const setPinSchema = z.object({
   pin: z.string().min(4).max(10),
 });
@@ -197,7 +204,7 @@ export const getTransactions = async (req: Request, res: Response) => {
     });
 
     res.json({
-      transactions: transactions.map((t) => ({
+      transactions: transactions.map((t: TransactionWithUsers) => ({
         ...t,
         amountDisplay: `$${(t.amount / 100).toFixed(2)}`,
       })),
