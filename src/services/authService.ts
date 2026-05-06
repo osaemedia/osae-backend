@@ -1,11 +1,12 @@
 import bcrypt from 'bcrypt';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../server';
 import { generateToken } from '../config/jwt';
 
 export const registerUser = async (email: string, phone: string, password: string, username: string) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   
-  const user = await prisma.$transaction(async (tx) => {
+  const user = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const newUser = await tx.user.create({
       data: {
         email,

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
 import bcrypt from 'bcrypt';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../server';
 import { sanitizeText } from '../utils/sanitize';
 
@@ -131,7 +132,7 @@ export const transfer = async (req: Request, res: Response) => {
     }
 
     // Perform transfer in transaction
-    const transaction = await prisma.$transaction(async (tx) => {
+    const transaction = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // Deduct from sender
       await tx.wallet.update({
         where: { userId: senderId },
@@ -224,7 +225,7 @@ export const deposit = async (req: Request, res: Response) => {
     }
 
     // Simulate deposit: add to wallet and create transaction
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       await tx.wallet.update({
         where: { userId },
         data: { balance: { increment: amount } },
@@ -279,7 +280,7 @@ export const withdraw = async (req: Request, res: Response) => {
     }
 
     // Simulate withdrawal: deduct from wallet and create transaction
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       await tx.wallet.update({
         where: { userId },
         data: { balance: { decrement: amount } },
